@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Views -->
+
+        <record id="cm_contract_view_form" model="ir.ui.view">
+            <field name="name">cm.contract.view.form</field>
+            <field name="model">cm.contract</field>
+            <field name="arch" type="xml">
+                <form string="Contract">
+                    <field name="is_manager" invisible="1" />
+                    <group string="Actions">
+                        <div>
+                            <button name="publish" string="Publish" states="draft" groups="contract_management.group_cm_author,contract_management.group_cm_manager" />
+                            <button name="assign" string="Approve" states="published" groups="contract_management.group_cm_worker,contract_management.group_cm_manager" help="Assigns contract to current user" />
+                            <button name="reject" string="Reject" states="published,assigned" groups="contract_management.group_cm_author,contract_management.group_cm_manager" />
+                            <button name="complete" string="Complete" states="assigned" groups="contract_management.group_cm_worker,contract_management.group_cm_manager" />
+                            <button name="revise" string="Revise" states="complete" groups="contract_management.group_cm_author,contract_management.group_cm_manager" />
+                            <button name="done" string="Done" states="complete" groups="contract_management.group_cm_author,contract_management.group_cm_manager" />
+                        </div>
+                    </group>
+                    <group string="Details" col="2">
+                        <group colspan="1">
+                            <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                            <field name="worker_id" attrs="{'readonly': [('is_manager', '=', False)]}" />
+                            <field name="description" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                        </group>
+                        <group colspan="1">
+                            <field name="state" />
+                            <!-- Creating a `create_id` field is useless because another `create_uid` one already exists, but it has been asked for the exercise -->
+                            <field name="create_id" readonly="1" attrs="{'invisible': [('create_id', '=', False)]}" />
+                            <!-- Changing of the field widget because a date is expecting in the exercise (no datetime has been asked, so...) -->
+                            <field name="create_date" string="Create date" widget="date" readonly="1" attrs="{'invisible': [('create_date', '=', False)]}" />
+                            <field name="publish_date" />
+                            <field name="close_date" />
+                            <field name="reject_date" />
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="cm_contract_view_tree">
+            <field name="name">cm.contract.view.tree</field>
+            <field name="model">cm.contract</field>
+            <field name="arch" type="xml">
+                <tree string="Contracts">
+                    <field name="name" />
+                    <field name="state" />
+                    <field name="create_id" />
+                    <field name="description" />
+                </tree>
+            </field>
+        </record>
+
+        <!-- Actions -->
+
+        <!-- ************ -->
+        <!-- My contracts -->
+        <!-- ************ -->
+
+        <!-- Worker -->
+
+        <record id="action_view_cm_contract_my_contracts_worker" model="ir.actions.act_window">
+            <field name="name">My contracts</field>
+            <field name="res_model">cm.contract</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[
+                ('state', '=', 'assigned'),
+                ('worker_id', '=', uid)
+            ]</field>
+            <field name="context">{
+                'form_view_ref': 'contract_management.cm_contract_view_form',
+                'tree_view_ref': 'contract_management.cm_contract_view_tree'
+            }</field>
+        </record>
+
+        <!-- Author -->
+
+        <record id="action_view_cm_contract_my_contracts_author" model="ir.actions.act_window">
+            <field name="name">My contracts</field>
+            <field name="res_model">cm.contract</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[
+                ('state', 'in', ['draft', 'assigned', 'rejected', 'complete', 'closed']),
+                ('create_id', '=', uid)
+            ]</field>
+            <field name="context">{
+                'form_view_ref': 'contract_management.cm_contract_view_form',
+                'tree_view_ref': 'contract_management.cm_contract_view_tree'
+            }</field>
+        </record>
+
+        <!-- Manager -->
+
+        <record id="action_view_cm_contract_my_contracts_manager" model="ir.actions.act_window">
+            <field name="name">My contracts</field>
+            <field name="res_model">cm.contract</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '!=', 'published')]</field>
+            <field name="context">{
+                'form_view_ref': 'contract_management.cm_contract_view_form',
+                'tree_view_ref': 'contract_management.cm_contract_view_tree'
+            }</field>
+        </record>
+
+        <!-- Available -->
+
+        <!-- No access restriction specified for available contracts -->
+        <record id="action_view_cm_contract_available" model="ir.actions.act_window">
+            <field name="name">Available</field>
+            <field name="res_model">cm.contract</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'published')]</field>
+            <field name="context">{
+                'form_view_ref': 'contract_management.cm_contract_view_form',
+                'tree_view_ref': 'contract_management.cm_contract_view_tree'
+            }</field>
+        </record>
+
+        <!-- Menu -->
+
+        <menuitem
+                name="Contracts"
+                id="menu_cm_root_contracts"
+                sequence="2"
+                groups="group_cm_worker,group_cm_author,group_cm_manager" />
+
+            <menuitem
+                    id="menu_cm_contracts"
+                    name="Contracts"
+                    parent="menu_cm_root_contracts"
+                    sequence="0"
+                    groups="group_cm_worker,group_cm_author,group_cm_manager" />
+
+            <!-- My contracts -->
+
+                <!-- Worker -->
+
+                <menuitem
+                        id="menu_cm_my_contracts_worker"
+                        name="My contracts"
+                        parent="menu_cm_contracts"
+                        sequence="0"
+                        groups="group_cm_worker"
+                        action="action_view_cm_contract_my_contracts_worker" />
+
+                <!-- Author -->
+
+                <menuitem
+                        id="menu_cm_my_contracts_author"
+                        name="My contracts"
+                        parent="menu_cm_contracts"
+                        sequence="0"
+                        groups="group_cm_author"
+                        action="action_view_cm_contract_my_contracts_author" />
+
+                <!-- Manager -->
+
+                <menuitem
+                        id="menu_cm_my_contracts_manager_manager"
+                        name="My contracts"
+                        parent="menu_cm_contracts"
+                        sequence="0"
+                        groups="group_cm_manager"
+                        action="action_view_cm_contract_my_contracts_manager" />
+
+                <!-- Available -->
+
+                <menuitem
+                        id="menu_cm_available"
+                        name="Available"
+                        parent="menu_cm_contracts"
+                        sequence="1"
+                        groups="group_cm_worker,group_cm_author,group_cm_manager"
+                        action="action_view_cm_contract_available" />
+    </data>
+</openerp>

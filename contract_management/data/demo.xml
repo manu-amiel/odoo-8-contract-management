@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- ***** -->
+        <!-- Users -->
+        <!-- ***** -->
+
+        <!-- Worker -->
+
+        <record id="cm_partner_demo_worker" model="res.partner">
+            <field name="name">Demo Worker</field>
+            <field name="email">worker@demo.com</field>
+        </record>
+
+        <record id="cm_user_worker" model="res.users" context="{'no_reset_password': True}">
+            <field name="partner_id" ref="contract_management.cm_partner_demo_worker"/>
+            <field name="login">worker</field>
+            <field name="password">a</field>
+            <field name="signature">Mr Worker</field>
+        </record>
+
+        <record id="contract_management.group_cm_worker" model="res.groups">
+            <field name="users" eval="[(4,ref('contract_management.cm_user_worker'))]"/>
+        </record>
+
+        <!-- Author -->
+
+        <record id="cm_partner_demo_author" model="res.partner">
+            <field name="name">Demo Author</field>
+            <field name="email">author@demo.com</field>
+        </record>
+
+        <record id="cm_user_author" model="res.users" context="{'no_reset_password': True}">
+            <field name="partner_id" ref="contract_management.cm_partner_demo_author"/>
+            <field name="login">author</field>
+            <field name="password">a</field>
+            <field name="signature">Mr Author</field>
+        </record>
+
+        <record id="contract_management.group_cm_author" model="res.groups">
+            <field name="users" eval="[(4,ref('contract_management.cm_user_author'))]"/>
+        </record>
+
+        <!-- Manager -->
+
+        <record id="cm_partner_demo_manager" model="res.partner">
+            <field name="name">Demo Manager</field>
+            <field name="email">manager@demo.com</field>
+        </record>
+
+        <record id="cm_user_manager" model="res.users" context="{'no_reset_password': True}">
+            <field name="partner_id" ref="contract_management.cm_partner_demo_manager"/>
+            <field name="login">manager</field>
+            <field name="password">a</field>
+            <field name="signature">Mr Manager</field>
+        </record>
+
+        <record id="contract_management.group_cm_manager" model="res.groups">
+            <field name="users" eval="[(4,ref('contract_management.cm_user_manager'))]"/>
+        </record>
+
+    </data>
+</openerp>
